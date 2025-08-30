@@ -22,3 +22,13 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew core:build
+
+      - name: Build with Gradle
+        run: ./gradlew core:build
+
+      # 把构建产物保存为 Actions Artifact
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-build          # 下载时看到的文件名
+          path: core/build/libs     # 真正要打包的目录或文件
