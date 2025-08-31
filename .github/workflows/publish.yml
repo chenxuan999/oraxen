@@ -21,14 +21,14 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew core:build
+        run: ./gradlew build   # 改成这样
 
-      - name: Build with Gradle
-        run: ./gradlew core:build
-
-      # 把构建产物保存为 Actions Artifact
+      # 可选：把构建产物当 Actions Artifact 下载
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: core-build          # 下载时看到的文件名
-          path: core/build/libs     # 真正要打包的目录或文件
+          name: oraxen-build
+          path: |
+            core/build/libs/*.jar
+            */build/libs/*.jar
+
