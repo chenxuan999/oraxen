@@ -1,6 +1,6 @@
 name: Oraxen
 main: io.th0rgal.oraxen.OraxenPlugin
-version: ${projectVersion}
+version: 1.192.1
 api-version: "1.20"
 author: Th0rgal
 description: Powerful resource-pack item & block system
