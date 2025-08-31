@@ -1,0 +1,14 @@
+name: Oraxen
+main: io.th0rgal.oraxen.OraxenPlugin
+version: ${projectVersion}
+api-version: "1.20"
+author: Th0rgal
+description: Powerful resource-pack item & block system
+website: https://oraxen.com
+load: POSTWORLD
+depend: [ProtocolLib]
+softdepend: []
+commands:
+  oraxen:
+    description: Main command
+    usage: /oraxen
