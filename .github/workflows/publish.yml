@@ -1,4 +1,14 @@
-name: Build on push
+      # 4. 清理并构建完整可运行 jar（包含所有依赖）
+      - name: Build fat-jar with shadowJar
+        run: |
+          ./gradlew clean shadowJar --no-daemon --stacktrace
+
+      # 5. 上传最终的 fat-jar（路径按你项目实际输出目录写）
+      - name: Upload fat-jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: oraxen-fat-jar
+          path: core/build/libs/*-all.jar   # shadowJar 默认命名带 -allname: Build on push
 
 on:
   push:
@@ -20,15 +30,15 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build with Gradle
-        run: ./gradlew build   # 改成这样
+      # 4. 清理并构建完整可运行 jar（包含所有依赖）
+      - name: Build fat-jar with shadowJar
+        run: |
+          ./gradlew clean shadowJar --no-daemon --stacktrace
 
-      # 可选：把构建产物当 Actions Artifact 下载
-      - name: Upload build artifacts
+      # 5. 上传最终的 fat-jar（路径按你项目实际输出目录写）
+      - name: Upload fat-jar
         uses: actions/upload-artifact@v4
         with:
-          name: oraxen-build
-          path: |
-            core/build/libs/*.jar
-            */build/libs/*.jar
+          name: oraxen-fat-jar
+          path: core/build/libs/*-all.jar   # shadowJar 默认命名带 -all
 
