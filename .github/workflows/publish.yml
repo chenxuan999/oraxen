@@ -1,32 +1,46 @@
+name: Build Oraxen (collect jars)
+
+# 触发条件：push 或 PR 到 master / develop
 on:
   push:
+    branches: [ master, develop ]
+  pull_request:
     branches: [ master, develop ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
+      # 1. 拉取源码
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 2. 安装 JDK 21
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
+      # 3. 给 gradlew 加执行权限
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      # 4. 清理并构建完整可运行 jar（包含所有依赖）
-      - name: Build fat-jar with shadowJar
-        run: |
-          ./gradlew clean shadowJar --no-daemon --stacktrace
+      # 4. 清理并构建（含 shadowJar）
+      - name: Build with Gradle
+        run: ./gradlew clean shadowJar --no-daemon --stacktrace
 
-      # 5. 上传最终的 fat-jar（路径按你项目实际输出目录写）
-      - name: Upload fat-jar
+      # 5. 只收集所有 *.jar 并打包
+      - name: Collect jars
+        run: |
+          mkdir jars
+          find . -type f -name "*.jar" ! -path "./jars/*" -exec cp {} jars/ \;
+          zip -r oraxen-jars.zip jars/
+
+      # 6. 上传
+      - name: Upload jars
         uses: actions/upload-artifact@v4
         with:
-          name: oraxen-fat-jar
-          path: core/build/libs/*-all.jar   # shadowJar 默认命名带 -all
-
+          name: oraxen-jars
+          path: oraxen-jars.zip
