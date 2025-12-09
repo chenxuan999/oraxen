@@ -1,7 +1,5 @@
 package io.th0rgal.oraxen;
 
-import dev.jorel.commandapi.CommandAPI;
-import dev.jorel.commandapi.CommandAPIBukkitConfig;
 import io.th0rgal.oraxen.api.OraxenItems;
 import io.th0rgal.oraxen.api.events.OraxenItemsLoadedEvent;
 import io.th0rgal.oraxen.commands.CommandsManager;
@@ -28,6 +26,7 @@ import io.th0rgal.oraxen.utils.breaker.PacketEventsBreakerSystem;
 import io.th0rgal.oraxen.utils.breaker.ProtocolLibBreakerSystem;
 import io.th0rgal.oraxen.utils.customarmor.CustomArmorListener;
 import io.th0rgal.oraxen.utils.inventories.InvManager;
+import io.th0rgal.oraxen.utils.logs.Logs;
 import io.th0rgal.protectionlib.ProtectionLib;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import org.bstats.bukkit.Metrics;
@@ -75,12 +74,12 @@ public class OraxenPlugin extends JavaPlugin {
 
     @Override
     public void onLoad() {
-        CommandAPI.onLoad(new CommandAPIBukkitConfig(this).silentLogs(true).skipReloadDatapacks(true));
+        // CommandAPI.onLoad(BukkitWrapper.createCommandApiConfig(this));
     }
 
     @Override
     public void onEnable() {
-        CommandAPI.onEnable();
+        // CommandAPI.onEnable();
         ProtectionLib.init(this);
         audience = BukkitAudiences.create(this);
         clickActionManager = new ClickActionManager(this);
@@ -91,12 +90,15 @@ public class OraxenPlugin extends JavaPlugin {
         if (Settings.KEEP_UP_TO_DATE.toBool())
             new SettingsUpdater().handleSettingsUpdate();
         if (PacketAdapter.isProtocolLibEnabled()) {
+            Logs.logInfo("[OraxenPlugin] ProtocolLib is enabled, using ProtocolLibAdapter");
             packetAdapter = new ProtocolLibAdapter();
             new ProtocolLibBreakerSystem().registerListener();
         } else if (PacketAdapter.isPacketEventsEnabled()) {
+            Logs.logInfo("[OraxenPlugin] ProtocolLib is NOT enabled, PacketEvents is enabled, using PacketEventsAdapter");
             packetAdapter = new PacketEventsAdapter();
             new PacketEventsBreakerSystem().registerListener();
         } else {
+            Logs.logWarning("[OraxenPlugin] Neither ProtocolLib nor PacketEvents is enabled, using EmptyAdapter");
             packetAdapter = new PacketAdapter.EmptyAdapter();
             Message.MISSING_PROTOCOLLIB.log();
         }
@@ -155,7 +157,7 @@ public class OraxenPlugin extends JavaPlugin {
                 NMSHandlers.getHandler().glyphHandler().uninject(player);
 
         CompatibilitiesManager.disableCompatibilities();
-        CommandAPI.onDisable();
+        // CommandAPI.onDisable();
         Message.PLUGIN_UNLOADED.log();
     }
 
