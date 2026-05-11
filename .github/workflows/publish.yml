@@ -1,26 +1,45 @@
-name: Publish project to Maven repository
+name: Build Oraxen (collect jars)
+
+# 触发条件：push 或 PR 到 master / develop
 on:
-  release:
-    types: [published]
+  push:
+    branches: [ master, develop ]
+  pull_request:
+    branches: [ master, develop ]
+
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
-    # Only publish when the release is actually published (not draft / prerelease) and in the original repository
-    if: ${{ github.repository == 'oraxen/oraxen' && github.event.release.draft == false && github.event.release.prerelease == false }}
+
     steps:
-      - uses: actions/checkout@v4
-        with:
-          # Build/publish the exact tag that was released
-          ref: ${{ github.event.release.tag_name }}
+      # 1. 拉取源码
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. 安装 JDK 21
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: 21
+          java-version: '21'
+          distribution: 'temurin'
+
+      # 3. 给 gradlew 加执行权限
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-      - name: Publish with Gradle
-        run: ./gradlew core:build core:publish
-        env:
-          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }} # token name
-          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }} # token secret (password)
+
+      # 4. 清理并构建（含 shadowJar）
+      - name: Build with Gradle
+        run: ./gradlew clean shadowJar --no-daemon --stacktrace
+
+      # 5. 只收集所有 *.jar 并打包
+      - name: Collect jars
+        run: |
+          mkdir jars
+          find . -type f -name "*.jar" ! -path "./jars/*" -exec cp {} jars/ \;
+          zip -r oraxen-jars.zip jars/
+      # 6. 上传
+      - name: Upload jars
+        uses: actions/upload-artifact@v4
+        with:
+          name: oraxen-jars
+          path: oraxen-jars.zip
